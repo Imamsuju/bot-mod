@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, userMention } from 'discord.js';
 import ms from "ms";
 
-export default function (message, args, config){
+export default async function (message, args, config){
     // Permission validation check
     if (!message.member.permissions.has(PermissionFlagsBits.MuteMembers)) {
         return message.reply('❌ Anda tidak diperbolehkan melakukan pembungkaman.');
@@ -55,7 +55,7 @@ export default function (message, args, config){
 
     try {
         // Apply native Discord Timeout (Mute)
-        targetMute.timeout(durationMs, reasonMute);
+        await targetMute.timeout(durationMs, reasonMute);
         message.reply(`🤐 **${targetMute.user.tag}** telah dibungkam selama **${durationStr}** | karena: *${reasonMute}*`);
     } catch (error) {
         console.error(error);

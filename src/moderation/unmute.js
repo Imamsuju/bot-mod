@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, userMention } from 'discord.js';
 
-export default function (message){
+export default async function (message){
     // Permission validation check
     if (!message.member.permissions.has(PermissionFlagsBits.MuteMembers)) {
         return message.reply('❌ Anda tidak diperbolehkan melepas pembungkaman.');
@@ -15,7 +15,7 @@ export default function (message){
 
     try {
         // Remove Timeout by sending null timeout value
-        targetLepas.timeout(null);
+        await targetLepas.timeout(null);
         message.reply(`🔊 **${targetLepas.user.tag}** berhasil dilepas pembungkamannya.`);
     } catch (error) {
         console.error(error);
