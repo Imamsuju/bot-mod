@@ -86,7 +86,7 @@ client.on('messageCreate', async(message) => {
                 if (message.member.id == config.creatorId) {
                   await message.reply(`Selamat datang, Yang Mulia <@${message.member.id}> <:ranilove:1243122088093417493>`);
                 } else {
-                  await message.reply('Hallo, ada yang bisa saya bantu?');
+                  await message.reply('Hallo, ada yang bisa saya bantu? <:raniwow:1243122472379748402>');
                 }
                 break;
             }
@@ -101,7 +101,7 @@ client.on('messageCreate', async(message) => {
                 break;
 
               default:
-                await message.reply('Hallo, ada yang bisa saya bantu?');
+                await message.reply('Hallo, ada yang bisa saya bantu? <:raniwow:1243122472379748402>');
                 break;
             }
           } else {
@@ -111,7 +111,7 @@ client.on('messageCreate', async(message) => {
                 break;
             
               default:
-                await message.reply(`Siapa elo?`);
+                await message.reply(`Siapa elo? <:raniwlee:1243122882973012081>`);
                 break;
             }
           }
