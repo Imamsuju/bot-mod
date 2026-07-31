@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits, PermissionFlagsBits, userMention } = require('discord.js');
 const config = require('./utils/config');
 const mod = require('./moderation/mod');
-const userid = require('./utils/userid');
+const utils = require('./utils/utils');
 
 const client = new Client({
     intents: [
@@ -79,7 +79,7 @@ client.on('messageCreate', async(message) => {
                 break;
               
               case "id":
-                userid.default(message);
+                utils.userid.default(message);
                 break;
                 
               default:
@@ -97,7 +97,7 @@ client.on('messageCreate', async(message) => {
                 break;
               
               case "id":
-                userid.default(message);
+                utils.userid.default(message);
                 break;
 
               default:
@@ -107,7 +107,7 @@ client.on('messageCreate', async(message) => {
           } else {
             switch (command) {
               case "id":
-                userid.default(message);
+                utils.userid.default(message);
                 break;
             
               default:
