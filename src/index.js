@@ -67,7 +67,7 @@ client.on('messageCreate', async(message) => {
                 break;
 
               case "bungkam":
-                mod.mute.default(message, config, args);
+                mod.mute.default(message, args, config);
                 break;
 
               case "lepaskan":

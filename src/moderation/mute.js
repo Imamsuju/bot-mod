@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, userMention } from 'discord.js';
 import ms from "ms";
 
-export default function (message, config, args){
+export default function (message, args, config){
     // Permission validation check
     if (!message.member.permissions.has(PermissionFlagsBits.MuteMembers)) {
         return message.reply('❌ Anda tidak diperbolehkan melakukan pembungkaman.');
