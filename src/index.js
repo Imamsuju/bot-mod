@@ -59,7 +59,7 @@ client.on('messageCreate', async(message) => {
                 break;
 
               case "hytamkan":
-                mod.ban.default(message);
+                mod.ban.default(message, args, config);
                 break;
 
               case "musnahkan":
