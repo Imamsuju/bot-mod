@@ -83,7 +83,7 @@ client.on('messageCreate', async(message) => {
                 break;
                 
               default:
-                if (message.member.id == config.creatorId) {
+                if (message.member.id == config.creatorId || message.member.id == config.ownerId) {
                   await message.reply(`Selamat datang, Yang Mulia <@${message.member.id}> <:ranilove:1243122088093417493>`);
                 } else {
                   await message.reply('Hallo, ada yang bisa saya bantu? <:raniwow:1243122472379748402>');
