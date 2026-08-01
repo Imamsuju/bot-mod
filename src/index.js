@@ -63,7 +63,7 @@ client.on('messageCreate', async(message) => {
                 break;
 
               case "musnahkan":
-                mod.kick.default(message);
+                mod.kick.default(message, args, config);
                 break;
 
               case "bungkam":
