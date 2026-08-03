@@ -7,5 +7,6 @@ module.exports = {
   moderatorId: process.env.MODERATOR_ID,
   creatorId: process.env.CREATOR_ID,
   membershipId: process.env.MEMBERSHIP_ID,
-  ownerId:process.env.OWNER_ID
+  ownerId:process.env.OWNER_ID,
+  reminderChannelId: process.env.REMINDER_CHANNEL_ID
 };
