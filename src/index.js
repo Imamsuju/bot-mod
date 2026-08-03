@@ -12,6 +12,10 @@ const client = new Client({
     ]
 });
 
+// Check Renew Server
+const renew = require('./utils/renew');
+renew(client, config);
+
 // Helper function to escape special regex characters from a static prefix
 const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
