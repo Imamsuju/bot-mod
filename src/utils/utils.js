@@ -1,7 +1,7 @@
-const renew = require('./renew');
+const cron = require('./cron');
 const helper = require('./helper');
 
 module.exports = {
-    renew,
+    cron,
     helper,
 }

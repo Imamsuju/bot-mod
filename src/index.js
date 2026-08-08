@@ -12,8 +12,6 @@ const client = new Client({
     ]
 });
 
-// Check Renew Server
-utils.renew(client, config);
 
 // Helper function to escape special regex characters from a static prefix
 const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -22,6 +20,10 @@ const staticPrefix = '!'; // Your default text prefix
 
 // Cleaning up expired warnings 
 mod.warn.startCleanupTask(client, config);
+// Check Renew Server
+utils.cron.startRenewTask(client, config);
+// Check Happy Birthday
+utils.cron.happyBirthdayTask(client, config);
 
 // Bot online
 client.once('clientReady', () => {
