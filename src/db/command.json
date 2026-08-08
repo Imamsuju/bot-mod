@@ -1,0 +1,42 @@
+[
+	{
+		"name": "hytamkan",
+		"membership" : false,
+        "moderator": true
+	},
+	{
+		"name": "musnahkan",
+		"membership" : false,
+        "moderator": true
+	},
+	{
+		"name": "bungkam",
+		"membership" : false,
+        "moderator": true
+	},
+	{
+		"name": "lepaskan",
+		"membership" : false,
+        "moderator": true
+	},
+	{
+		"name": "tandai",
+		"membership" : false,
+        "moderator": true
+	},
+	{
+		"name" : "sayang",
+		"membership" : true,
+		"moderator" : false
+	},
+	{
+		"name": "id",
+		"membership" : false,
+        "moderator": false
+	},
+	{
+		"name" : "nyebut",
+		"membership" : true,
+		"moderator" : false
+	}
+]
