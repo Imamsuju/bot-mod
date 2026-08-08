@@ -32,7 +32,7 @@ module.exports = {
 
             for (const [userId, bday] of Object.entries(birthdays)) {
                 if (bday === currentDate) {
-                    channel.send(`Happy Birthday to <@${userId}>! 🎉🎂\nAs Always https://youtu.be/KnJ7oeJzXyo?si=dxxMIJF4pnMn2e8c\nMaap telat<:ranilove:1243122088093417493>`);
+                    channel.send(`Happy Birthday to <@${userId}>! 🎉🎂\nAs Always https://youtu.be/KnJ7oeJzXyo?si=dxxMIJF4pnMn2e8c\nSemoga sehat selalu dan diberi kemudahan dalam setiap langkah kehidupan 🙏`);
                 }
             }
         }, {
