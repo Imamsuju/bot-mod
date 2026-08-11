@@ -3,13 +3,13 @@ const fs = require('fs');
 
 module.exports = {
     startRenewTask: function(client, config) {
-        // Runs every day at 19:00 WIB (7 PM WIB)
-        cron.schedule('0 19 * * *', () => {
+        // Runs every day at 18:00 WIB (6 PM WIB)
+        cron.schedule('0 18 * * *', () => {
             const tuan = client.users.fetch(config.creatorId);
-            tuan.then(user => user.send("Saatnya melakukan pengecekan server, jangan lupa untuk melakukan perpanjangan server ya\nCek di https://pella.app/"));
+            tuan.then(user => user.send("Saatnya melakukan pengecekan server, jangan lupa untuk melakukan perpanjangan server ya\nCek di https://fps.ms/"));
 
             const channel = client.channels.fetch(config.reminderChannelId);
-            channel.then(ch => ch.send("Saatnya melakukan pengecekan server, jangan lupa untuk melakukan perpanjangan server ya\nCek di https://pella.app/"));
+            channel.then(ch => ch.send("Saatnya melakukan pengecekan server, jangan lupa untuk melakukan perpanjangan server ya\nCek di https://fps.ms/"));
         }, {
             timezone: "Asia/Jakarta" // Set your local timezone
         });
