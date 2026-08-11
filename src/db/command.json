@@ -26,7 +26,7 @@
 	},
 	{
 		"name" : "sayang",
-		"membership" : true,
+		"membership" : false,
 		"moderator" : false
 	},
 	{

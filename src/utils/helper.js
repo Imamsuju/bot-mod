@@ -123,7 +123,11 @@ function executeCommand(command, message, args, config) {
             // Checking if the user is a moderator or membership member
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
             if(verifyCommandPermissions(cmd, message, config)){
-                return sendAttachment(message, './src/img/sayang.webp', 'Ini untukmu sayangku! 💖');
+                if (isMembershipMember(message,config)) {
+                    return sendAttachment(message, './src/img/sayang-member.webp', 'Ini untukmu sayangku! 💖');
+                } else {
+                    return sendAttachment(message, './src/img/sayang-non-member.webp', 'Ini untukmu sayangku, muach (kiss dari jauh)! 💖');
+                }
             }
             break;
             
