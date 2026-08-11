@@ -15,6 +15,11 @@
         "moderator": true
 	},
 	{
+		"name": "silence",
+		"membership" : false,
+        "moderator": true
+	},
+	{
 		"name": "lepaskan",
 		"membership" : false,
         "moderator": true

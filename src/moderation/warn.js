@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 
 const DB_PATH = path.join(__dirname, '../db/warnings.json');
-const WARNING_EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const CLEANUP_INTERVAL = 60 * 1000; // Check for expired warnings every 1 minute
 
 // Helper: Read data from JSON safely
@@ -27,7 +26,7 @@ function writeDatabase(data) {
 }
 
 // Action: Add a warning to a user
-function addWarning(userId, reason) {
+function addWarning(userId, reason, duration) {
     const warnings = readDatabase();
     const now = Date.now();
     
@@ -36,7 +35,7 @@ function addWarning(userId, reason) {
         userId: userId,
         reason: reason,
         timestamp: now,
-        expiresAt: now + WARNING_EXPIRATION_TIME
+        expiresAt: now + duration
     };
 
     warnings.push(newWarning);

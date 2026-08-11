@@ -66,7 +66,7 @@ client.on('messageCreate', async(message) => {
 
           // Check if the user is a moderator
           if (utils.helper.moderatorOnly(message)) {
-            utils.helper.executeCommand(command, message, args, config);
+            utils.helper.executeCommand(command, message, args);
             // Check if the author is the owner or creator
             if(message.author.id === config.creatorId || message.author.id === config.ownerId){
               // Check if the command is invalid 
@@ -80,14 +80,14 @@ client.on('messageCreate', async(message) => {
             }
           } else if(utils.helper.isMembershipMember(message, config)){
             // Check if the author is a membership member
-            utils.helper.executeCommand(command, message, args, config);
+            utils.helper.executeCommand(command, message, args);
             // Check if the command is invalid
             if(!utils.helper.checkCommand(command)){
               return message.reply(`Halo <@${message.author.id}>, aku siap membantu kamu.\nKalau tidak ingin dijutekin oleh aku, tetap membership yaa sayangku <:ranilove:1243122088093417493>`);
             }
         }
         else{
-          utils.helper.executeCommand(command, message, args, config);
+          utils.helper.executeCommand(command, message, args);
           // Check if the command is valid 
           if(!utils.helper.checkCommand(command)){
             return message.reply(`Siapa Elo?\nMau ngapain? Aku ga kenal sama elo, aku cuma kenal sama ownerku, moderator ku, dan <@${config.creatorId}>.`);

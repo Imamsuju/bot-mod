@@ -2,13 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, PermissionFlagsBits, AttachmentBuilder } = require('discord.js');
 const { sendAttachment, checkUserID } = require('./public');
-const { warn } = require('../moderation/mod');
+const { warn, unmute, mute } = require('../moderation/mod');
+const { membershipId, clientId, muteThreshold, kickThreshold, banThreshold } = require('./config');
 
-function getUser(message, config){
+function getUser(message){
     // Get the mentioned user or target ID
     const user = message.mentions.users.first();
-    if (!user || user == config.clientId) {
-        return console.error("❌ Please insert valid username or ID User.");
+    if (!user || user.id === clientId) {
+        return console.log("❌ Tolong kasih username yang jelas.");
     }
     return user;
 }
@@ -35,9 +36,9 @@ function moderatorOnly(message){
     }
 }
 
-function isMembershipMember(message, config){
+function isMembershipMember(message){
     // Check if the member has the membership role
-    const isMember = message.member.roles.cache.has(config.membershipId);
+    const isMember = message.member.roles.cache.has(membershipId);
     if (isMember) {
         console.log(`${message.author.tag} is a membership member.`);
         return true;
@@ -53,13 +54,13 @@ function getCommand(commandName){
     return commandData.find(cmd => cmd.name === commandName);
 }
 
-function verifyCommandPermissions(cmd, message, config) {
+function verifyCommandPermissions(cmd, message) {
     if (cmd.moderator && !moderatorOnly(message)) {
         message.reply("❌ Anda tidak diperbolehkan menggunakan perintah keluarga kerajaan.");
         return false;
     }
 
-    if (cmd.membership && !isMembershipMember(message, config)) {
+    if (cmd.membership && !isMembershipMember(message)) {
         message.reply("❌ Anda harus menjadi anggota berlangganan untuk menggunakan perintah ini.");
         return false;
     }
@@ -67,44 +68,108 @@ function verifyCommandPermissions(cmd, message, config) {
     return true;
 }
 
-function executeCommand(command, message, args, config) {
+function countDurationMs(durationStr){
+    let durationMs = 0;
+    const unit = durationStr.slice(-1);
+    const value = parseInt(durationStr.slice(0, -1));
+
+    if (isNaN(value)) {
+        return message.reply('❌ Kasih waktu pembungkaman yang benar dong, waktunya bukan angka');
+    }
+
+    switch (unit) {
+        case 'm':
+            durationMs = value * 60 * 1000;
+            if(value > 60) {
+                return message.reply('❌ Bang, menit itu cuma sampe 60, yang bener dong');
+            }
+            break;
+        case 'h':
+            durationMs = value * 60 * 60 * 1000;
+            if(value > 24) {
+                return message.reply('❌ Bang, jam itu cuma sampe 24, yang bener dong');
+            }
+            break;
+        case 'd':
+            durationMs = value * 24 * 60 * 60 * 1000;
+            break;
+        default:
+            return message.reply('❌ Kasih satuan waktunya yang jelas. gunakan m untuk menit, h untuk jam, atau d untuk hari.');
+    }
+
+    if (durationMs > 28 * 24 * 60 * 60 * 1000) {
+        return message.reply('❌ Durasi pembungkaman tidak boleh lebih dari 28 hari.');
+    }
+    return durationMs;
+}
+
+function checkThreshold(message){
+    const targetUser = getUser(message);
+    const totalWarnings = warn.getUserWarnings(targetUser.id).length;
+    console.log(totalWarnings);
+    if(totalWarnings >= banThreshold) {
+        return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${banThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Hytamkan.\nGosong Chef!!!`);
+    } else if(totalWarnings >= kickThreshold){
+        return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${kickThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Tendang.\nBismillah...\n1\n2\n3\nRider Kick!!!`);
+    } else if(totalWarnings >= muteThreshold){
+        mute.timeoutUserById(message,targetUser.id,countDurationMs("12h"), "Terkena 5 warning");
+        return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${muteThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Bungkam.\nAwokwowkowkwokwokwokwok`);
+    }
+    return false;
+}
+
+async function executeCommand(command, message, args) {
     const cmd = getCommand(command); // Check if the command is valid
     if (!cmd) {
         console.log(`Command "${command}" not recognized.`);
         return false;
     }
     console.log(cmd);
-    const targetUser = getUser(message, config);
+    const targetUser = getUser(message);
     console.log(targetUser);
 
-    const reason = args.slice(1).join(' ') || 'No reason provided';
+    const reason = args.slice(2).join(' ') || 'No reason provided';
+    const duration = args[1] || "24h";    
 
     switch (command) {
         case 'hytamkan':
-            require('./ban')(message, args, config);
             break;
 
         case 'musnahkan':
-            require('./kick')(message, args, config);
             break;
 
         case 'bungkam':
-            require('./mute')(message, args, config);
+        case 'silence':
+            console.log(`Command "bungkam" recognized`);
+            console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
+            if(verifyCommandPermissions(cmd, message)){
+                if(mute.timeoutUserById(message,targetUser.id,countDurationMs(duration), reason)){
+                    return message.reply(`✅ <@${targetUser.id}> berhasil dibungkam dengan **Righteous Fervor (Skill 1 Mortos AoV)** selama ${duration}.\nTidurlah dengan nyenyak selama terkena skill ini.\nLATOM🙏`);
+                };
+            }
             break;
 
         case 'lepaskan':
-            require('./unmute')(message, args, config);
+            console.log(`Command "lepaskan" recognized`);
+            console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
+            if(verifyCommandPermissions(cmd, message)){
+                if(mute.kaiho(message, targetUser.id, reason)) {
+                    return message.reply(`✅ <@${targetUser.id}> berhasil dibebaskan dari pembungkaman\nJangan lupa ucapkan terimakasih dulu <@${targetUser.id}>`)
+                }
+            }
             break;
 
         case 'tandai':
             console.log(`Command "tandai" recognized.`);
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
-            if(verifyCommandPermissions(cmd, message, config)){
-                if(warn.addWarning(targetUser.id, reason)){
+            if(verifyCommandPermissions(cmd, message)){
+                if(warn.addWarning(targetUser.id, reason, countDurationMs(duration))){
                     totalWarnings = warn.getUserWarnings(targetUser.id).length;
-                    message.reply(`✅ <@${targetUser.id}> sudah ditandai dengan alasan "${reason}". Total tanda yang aktif: ${totalWarnings}`);
+                    if(!checkThreshold(message)){
+                        return message.reply(`✅ <@${targetUser.id}> sudah ditandai dengan alasan "${reason}". Total peringatan yang aktif: ${totalWarnings}`);
+                    }
                 } else {
-                    message.reply("❌ Gagal menandai target.");
+                    message.reply(`❌ Gagal memberi peringatan ke ${targetUser.id}.`);
                 }
             }
             break;
@@ -113,7 +178,7 @@ function executeCommand(command, message, args, config) {
             console.log(`Command "id" recognized.`);
             // Checking if the user is a moderator or membership member
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
-            if(verifyCommandPermissions(cmd, message, config)){
+            if(verifyCommandPermissions(cmd, message)){
                 return checkUserID(message);
             }
             break;
@@ -122,8 +187,8 @@ function executeCommand(command, message, args, config) {
             console.log(`Command "sayang" recognized.`);
             // Checking if the user is a moderator or membership member
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
-            if(verifyCommandPermissions(cmd, message, config)){
-                if (isMembershipMember(message,config)) {
+            if(verifyCommandPermissions(cmd, message)){
+                if (isMembershipMember(message)) {
                     return sendAttachment(message, './src/img/sayang-member.webp', 'Ini untukmu sayangku! 💖');
                 } else {
                     return sendAttachment(message, './src/img/sayang-non-member.webp', 'Ini untukmu sayangku, muach (kiss dari jauh)! 💖');
@@ -135,7 +200,7 @@ function executeCommand(command, message, args, config) {
             console.log(`Command "nyebut" recognized.`);
             // Checking if the user is a moderator or membership member
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
-            if(verifyCommandPermissions(cmd, message, config)){
+            if(verifyCommandPermissions(cmd, message)){
                 return sendAttachment(message, './src/img/astagfirullah.webp', '');
             }
             break;
