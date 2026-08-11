@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, PermissionFlagsBits, AttachmentBuilder } = require('discord.js');
-const { sendAttachment, checkUserID } = require('./public');
 const { warn, unmute, mute } = require('../moderation/mod');
 const { membershipId, clientId, muteThreshold, kickThreshold, banThreshold } = require('./config');
 
@@ -116,6 +115,17 @@ function checkThreshold(message){
         return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${muteThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Bungkam.\nAwokwowkowkwokwokwokwok`);
     }
     return false;
+}
+
+async function checkUserID(message)
+{
+    message.author.send(`ID Discord anda : \`\`${message.author.id}\`\``);
+    await message.reply(`Cek DM anda`);
+}
+
+async function sendAttachment(message, filePath, description) {
+    const attachment = new AttachmentBuilder(filePath);
+    await message.reply({ content: description, files: [attachment] });
 }
 
 async function executeCommand(command, message, args) {
