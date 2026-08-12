@@ -224,6 +224,7 @@ async function executeCommand(command, message, args) {
                     if(warn.addWarning(targetUser.id, reason, countDurationMs(duration))){
                         totalWarnings = warn.getUserWarnings(targetUser.id).length;
                         if(!checkThreshold(message)){
+                            message.reply(`https://klipy.com/gifs/diam-hitam`);
                             return message.reply(`✅ <@${targetUser.id}> sudah ditandai dengan alasan "${reason}". Total peringatan yang aktif: ${totalWarnings}`);
                         }
                     } else {
