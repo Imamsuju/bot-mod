@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, PermissionFlagsBits, AttachmentBuilder } = require('discord.js');
-const { warn, unmute, mute } = require('../moderation/mod');
+const { warn, mute, kick } = require('../moderation/mod');
 const { membershipId, clientId, muteThreshold, kickThreshold, banThreshold } = require('./config');
 
 function getUser(message){
@@ -102,7 +102,7 @@ function countDurationMs(durationStr){
     return durationMs;
 }
 
-function checkThreshold(message){
+async function checkThreshold(message){
     const targetUser = getUser(message);
     const totalWarnings = warn.getUserWarnings(targetUser.id).length;
     console.log(totalWarnings);
@@ -128,6 +128,21 @@ async function sendAttachment(message, filePath, description) {
     await message.reply({ content: description, files: [attachment] });
 }
 
+function selfTarget(message, targetUser){
+    console.log(targetUser.id);
+    if (targetUser.id === message.author.id) return message.reply('❌ Kamu tidak bisa menargetkan dirimu sendiri.');
+}
+
+function kickable(message, targetUser){
+    console.log(targetUser);
+    const targetKick = message.guild.members.cache.get(targetUser.id);
+    if (!targetKick.kickable) return message.reply('❌ Saya tidak bisa menendang target karena posisi target lebih tinggi.');
+}
+function moderatable(message, targetUser){
+    const targetModeratable = message.guild.members.cache.get(targetUser.id);
+    if (!targetModeratable.moderatable) return message.reply('❌ Saya tidak bisa menendang target karena posisi target lebih tinggi.');
+}
+
 async function executeCommand(command, message, args) {
     const cmd = getCommand(command); // Check if the command is valid
     if (!cmd) {
@@ -146,6 +161,31 @@ async function executeCommand(command, message, args) {
             break;
 
         case 'musnahkan':
+            console.log(`Command "musnahkan" recognized`);
+            console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
+            if(verifyCommandPermissions(cmd, message)){
+                if (!selfTarget(message, targetUser)) {
+                    if (!kickable(message,targetUser)) {
+                        let count = 0;
+    
+                        const intervalId = setInterval(() => {
+                        count++;
+                        console.log(`Count: ${count}`);
+                        message.reply(`${count}`);
+    
+                        // Stop the interval once the count reaches 5
+                        if (count === 3) {
+                            clearInterval(intervalId);
+                            message.reply(`https://klipy.com/gifs/kamen-rider-kabuto-kamen-rider-stronger`);
+                            console.log("Timer stopped.");
+                            const riderKick = setTimeout(()=>{
+                                kick.tendang(message, targetUser, reason);
+                            }, 3000)
+                        }
+                        }, 1000);
+                    }
+                }
+            }
             break;
 
         case 'bungkam':
@@ -153,9 +193,14 @@ async function executeCommand(command, message, args) {
             console.log(`Command "bungkam" recognized`);
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
             if(verifyCommandPermissions(cmd, message)){
-                if(mute.timeoutUserById(message,targetUser.id,countDurationMs(duration), reason)){
-                    return message.reply(`✅ <@${targetUser.id}> berhasil dibungkam dengan **Righteous Fervor (Skill 1 Mortos AoV)** selama ${duration}.\nTidurlah dengan nyenyak selama terkena skill ini.\nLATOM🙏`);
-                };
+                if (!selfTarget(message, targetUser)) {
+                    if(!moderatable(message, targetUser)){
+                        if(mute.timeoutUserById(message,targetUser.id,countDurationMs(duration), reason)){
+                            await message.reply(`https://klipy.com/gifs/ssst-isilop`);
+                            return message.reply(`✅ <@${targetUser.id}> berhasil dibungkam dengan **Righteous Fervor (Skill 1 Mortos AoV)** selama ${duration}.\nTidurlah dengan nyenyak selama terkena skill ini.\nLATOM🙏`);
+                        }
+                    }
+                }
             }
             break;
 
@@ -163,8 +208,10 @@ async function executeCommand(command, message, args) {
             console.log(`Command "lepaskan" recognized`);
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
             if(verifyCommandPermissions(cmd, message)){
-                if(mute.kaiho(message, targetUser.id, reason)) {
-                    return message.reply(`✅ <@${targetUser.id}> berhasil dibebaskan dari pembungkaman\nJangan lupa ucapkan terimakasih dulu <@${targetUser.id}>`)
+                if (!selfTarget(message,targetUser)) {
+                    if(mute.kaiho(message, targetUser.id, reason)) {
+                        return message.reply(`✅ <@${targetUser.id}> berhasil dibebaskan dari pembungkaman\nJangan lupa ucapkan terimakasih dulu kepada <@${message.author.id}> karena sudah membebaskanmu dari pembungkaman`)
+                    }
                 }
             }
             break;
@@ -173,13 +220,15 @@ async function executeCommand(command, message, args) {
             console.log(`Command "tandai" recognized.`);
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
             if(verifyCommandPermissions(cmd, message)){
-                if(warn.addWarning(targetUser.id, reason, countDurationMs(duration))){
-                    totalWarnings = warn.getUserWarnings(targetUser.id).length;
-                    if(!checkThreshold(message)){
-                        return message.reply(`✅ <@${targetUser.id}> sudah ditandai dengan alasan "${reason}". Total peringatan yang aktif: ${totalWarnings}`);
+                if (!selfTarget(message,targetUser)) {
+                    if(warn.addWarning(targetUser.id, reason, countDurationMs(duration))){
+                        totalWarnings = warn.getUserWarnings(targetUser.id).length;
+                        if(!checkThreshold(message)){
+                            return message.reply(`✅ <@${targetUser.id}> sudah ditandai dengan alasan "${reason}". Total peringatan yang aktif: ${totalWarnings}`);
+                        }
+                    } else {
+                        message.reply(`❌ Gagal memberi peringatan ke ${targetUser.id}.`);
                     }
-                } else {
-                    message.reply(`❌ Gagal memberi peringatan ke ${targetUser.id}.`);
                 }
             }
             break;
@@ -217,6 +266,7 @@ async function executeCommand(command, message, args) {
 
         default:
             console.log(`Command "${command}" not recognized.`);
+            return false;
             break;
     }
 }
