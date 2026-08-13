@@ -15,8 +15,8 @@ module.exports = {
         });
     },
     happyBirthdayTask: function(client, config) {
-        // Runs every day at 00:00 WIB (midnight WIB)
-        cron.schedule('0 0 * * *', async () => {
+        // Runs every day at 05:00 WIB
+        cron.schedule('0 5 * * *', async () => {
             // Implementation for birthday greetings
             const rawData = fs.readFileSync('./src/db/ultah.json');
             const birthdays = JSON.parse(rawData);
