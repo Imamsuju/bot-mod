@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, PermissionFlagsBits, AttachmentBuilder } = require('discord.js');
-const { warn, mute, kick } = require('../moderation/mod');
+const { warn, mute, kick, ban } = require('../moderation/mod');
 const { membershipId, clientId, muteThreshold, kickThreshold, banThreshold } = require('./config');
 
 function getUser(message){
@@ -104,14 +104,32 @@ function countDurationMs(durationStr){
 
 async function checkThreshold(message){
     const targetUser = getUser(message);
-    const totalWarnings = warn.getUserWarnings(targetUser.id).length;
+    const totalWarnings = warn.getUserWarnings(targetUser.id).length + 1;
     console.log(totalWarnings);
     if(totalWarnings >= banThreshold) {
-        return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${banThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Hytamkan.\nGosong Chef!!!`);
+        ban.hytamkan(message,targetUser,`Terkena ${banThreshold} Warning`);
+        return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${banThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Hytamkan.\nhttps://tenor.com/view/tewas-dihitamkan-patrick-hitam-gif-18417932086044069974`);
     } else if(totalWarnings >= kickThreshold){
-        return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${kickThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Tendang.\nBismillah...\n1\n2\n3\nRider Kick!!!`);
+        let count = 0;
+    
+        const intervalId = setInterval(() => {
+        count++;
+        console.log(`Count: ${count}`);
+        message.reply(`${count}`);
+
+        // Stop the interval once the count reaches 5
+        if (count === 3) {
+            clearInterval(intervalId);
+            message.reply(`https://klipy.com/gifs/kamen-rider-kabuto-kamen-rider-stronger`);
+            console.log("Timer stopped.");
+            const riderKick = setTimeout(()=>{
+                kick.tendang(message, targetUser, `Terkena ${kickThreshold} warning`);
+            }, 3000)
+        }
+        }, 1000);
     } else if(totalWarnings >= muteThreshold){
-        mute.timeoutUserById(message,targetUser.id,countDurationMs("12h"), "Terkena 5 warning");
+        mute.timeoutUserById(message,targetUser.id,countDurationMs("12h"), `Terkena ${muteThreshold} warning`);
+        await message.reply(`https://klipy.com/gifs/ssst-isilop`);
         return message.reply(`<@${targetUser.id}>, karena sudah memiliki lebih dari ${muteThreshold} tanda.\nMaka dengan titah kerajaan Gato Palace, kau ku Bungkam.\nAwokwowkowkwokwokwokwok`);
     }
     return false;
@@ -138,6 +156,11 @@ function kickable(message, targetUser){
     const targetKick = message.guild.members.cache.get(targetUser.id);
     if (!targetKick.kickable) return message.reply('❌ Saya tidak bisa menendang target karena posisi target lebih tinggi.');
 }
+function bannable(message, targetUser){
+    console.log(targetUser);
+    const targetBan = message.guild.members.cache.get(targetUser.id);
+    if (!targetBan.bannable) return message.reply('❌ Saya tidak bisa memghytamkan target karena posisi target lebih tinggi.');
+}
 function moderatable(message, targetUser){
     const targetModeratable = message.guild.members.cache.get(targetUser.id);
     if (!targetModeratable.moderatable) return message.reply('❌ Saya tidak bisa menendang target karena posisi target lebih tinggi.');
@@ -153,11 +176,28 @@ async function executeCommand(command, message, args) {
     const targetUser = getUser(message);
     console.log(targetUser);
 
-    const reason = args.slice(2).join(' ') || 'No reason provided';
-    const duration = args[1] || "24h";    
+    let reason = args.slice(2).join(' ') || 'No reason provided';
+    let duration = args[1] || "24h";    
 
     switch (command) {
         case 'hytamkan':
+            console.log(`Command "hytamkan" recognized`);
+            console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
+            if (verifyCommandPermissions(cmd, message)) {
+                if(!selfTarget(message, targetUser)){
+                    if(!bannable(message, targetUser)){
+                        let reasonBan = '';
+                        if(duration === "24h"){
+                            reasonBan = `${reason}`;
+                        } else {
+                            reasonBan = `${duration} ${reason}`;
+                        }
+                        console.log(reasonBan);
+                        ban.hytamkan(message,targetUser,reasonBan);
+                        return message.reply(`https://tenor.com/view/tewas-dihitamkan-patrick-hitam-gif-18417932086044069974`);
+                    }
+                }
+            }
             break;
 
         case 'musnahkan':
@@ -166,6 +206,7 @@ async function executeCommand(command, message, args) {
             if(verifyCommandPermissions(cmd, message)){
                 if (!selfTarget(message, targetUser)) {
                     if (!kickable(message,targetUser)) {
+                        let reasonKick = `${duration} ${reason}`; 
                         let count = 0;
     
                         const intervalId = setInterval(() => {
@@ -179,7 +220,14 @@ async function executeCommand(command, message, args) {
                             message.reply(`https://klipy.com/gifs/kamen-rider-kabuto-kamen-rider-stronger`);
                             console.log("Timer stopped.");
                             const riderKick = setTimeout(()=>{
-                                kick.tendang(message, targetUser, reason);
+                                let reasonKick = ''
+                                if(duration === "24h"){
+                                    reasonKick = `${reason}`;
+                                } else {
+                                    reasonKick = `${duration} ${reason}`;
+                                }
+                                console.log(reasonKick);
+                                kick.tendang(message, targetUser, reasonKick);
                             }, 3000)
                         }
                         }, 1000);
@@ -209,7 +257,8 @@ async function executeCommand(command, message, args) {
             console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
             if(verifyCommandPermissions(cmd, message)){
                 if (!selfTarget(message,targetUser)) {
-                    if(mute.kaiho(message, targetUser.id, reason)) {
+                    const reasonKai = `${duration} ${reason}`;
+                    if(mute.kaiho(message, targetUser.id, reasonKai)) {
                         return message.reply(`✅ <@${targetUser.id}> berhasil dibebaskan dari pembungkaman\nJangan lupa ucapkan terimakasih dulu kepada <@${message.author.id}> karena sudah membebaskanmu dari pembungkaman`)
                     }
                 }
@@ -222,11 +271,9 @@ async function executeCommand(command, message, args) {
             if(verifyCommandPermissions(cmd, message)){
                 if (!selfTarget(message,targetUser)) {
                     if(warn.addWarning(targetUser.id, reason, countDurationMs(duration))){
-                        totalWarnings = warn.getUserWarnings(targetUser.id).length;
-                        if(!checkThreshold(message)){
-                            message.reply(`https://klipy.com/gifs/diam-hitam`);
-                            return message.reply(`✅ <@${targetUser.id}> sudah ditandai dengan alasan "${reason}". Total peringatan yang aktif: ${totalWarnings}`);
-                        }
+                        checkThreshold(message);
+                        totalWarnings = warn.getUserWarnings(targetUser.id).length + 1;
+                        return message.reply(`✅ <@${targetUser.id}> sudah ditandai dengan alasan "${reason}". Total peringatan yang aktif: ${totalWarnings}`);
                     } else {
                         message.reply(`❌ Gagal memberi peringatan ke ${targetUser.id}.`);
                     }

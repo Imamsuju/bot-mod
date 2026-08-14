@@ -26,7 +26,7 @@ function writeDatabase(data) {
 }
 
 // Action: Add a warning to a user
-function addWarning(userId, reason, duration) {
+async function addWarning(userId, reason, duration) {
     const warnings = readDatabase();
     const now = Date.now();
     
@@ -38,12 +38,17 @@ function addWarning(userId, reason, duration) {
         expiresAt: now + duration
     };
 
-    warnings.push(newWarning);
-    writeDatabase(warnings);
-    
-    const userCount = warnings.filter(w => w.userId === userId).length;
-    console.log(`[WARN] User ${userId} warned. Reason: "${reason}". Total active warnings: ${userCount}`);
-    return userCount;
+    try {
+        await warnings.push(newWarning);
+        await writeDatabase(warnings);
+        
+        const userCount = await warnings.filter(w => w.userId === userId).length;
+        console.log(`[WARN] User ${userId} warned. Reason: "${reason}". Total active warnings: ${userCount}`);
+        return userCount;
+    } catch (error) {
+        console.error('Failed to warn member:', error);
+    }
+
 }
 
 // Action: Get all active warnings for a user
