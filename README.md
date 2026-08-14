@@ -1,0 +1,3 @@
+Next Update on plan : 
+1. Nambah fitur auto delete role pendatang + auto role penduduk lokal pada member >= 30 hari
+2. ...
