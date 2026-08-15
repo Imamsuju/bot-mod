@@ -24,6 +24,8 @@ mod.warn.startCleanupTask(client, config);
 utils.cron.startRenewTask(client, config);
 // Check Happy Birthday
 utils.cron.happyBirthdayTask(client, config);
+// ini buat yang gabung sebelum tanggal 15 Agustus 2026
+utils.cron.setPendudukLocal(client, config);
 
 // Bot online
 client.once('clientReady', () => {
@@ -97,6 +99,24 @@ client.on('messageCreate', async(message) => {
           console.error('Failed to send reply:', error);
       }
   }
+});
+
+// Ini buat yang baru gabung per tanggal 15 Agustus 2026
+client.on('guildMemberAdd', (member) => {
+  // Set time interval in milliseconds
+  const delayMs = 30 * 24 * 60 * 60 * 1000; 
+  const roleId = config.pendudukLokalId;
+  const roleLawas = config.pendatangId;
+
+  setTimeout(async () => {
+    try {
+      await member.roles.add(roleId);
+      await member.roles.remove(roleLawas);
+      console.log(`Assigned role to ${member.user.tag}`);
+    } catch (error) {
+      console.error('Failed to assign role:', error);
+    }
+  }, delayMs);
 });
 
 client.login(config.token);

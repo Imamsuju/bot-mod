@@ -38,5 +38,27 @@ module.exports = {
         }, {
             timezone: "Asia/Jakarta"
         });
+    },
+    setPendudukLocal:function(client, config) {
+        // Dilakukan tiap jam 6 Pagi WIB
+        cron.schedule('0 6 * * *', async () => {
+            const guild = client.guilds.cache.get(config.guildId);
+            const pendudukLocal = config.pendudukLokalId;
+            const pendatang = config.pendatangId;
+
+            // Fetch members and filter those who meet your criteria
+            const members = await guild.members.fetch();
+            const now = Date.now();
+            const delayMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+            for (const [id, member] of members) {
+                if (!member.roles.cache.has(pendudukLocal)) {
+                    if (now - member.joinedTimestamp >= delayMs) {
+                        await member.roles.add(pendudukLocal).catch(console.error);
+                        await member.roles.remove(pendatang).catch(console.error);
+                    }
+                }
+            }
+        });
     }
 }
