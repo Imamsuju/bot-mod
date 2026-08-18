@@ -47,7 +47,7 @@ module.exports = {
             const pendatang = config.pendatangId;
 
             // Fetch members and filter those who meet your criteria
-            const members = await guild.members.fetch();
+            const members = await guild.members.cache.filter(member => !member.user.bot);
             const now = Date.now();
             const delayMs = 30 * 24 * 60 * 60 * 1000; // 30 days
 

@@ -101,22 +101,4 @@ client.on('messageCreate', async(message) => {
   }
 });
 
-// Ini buat yang baru gabung per tanggal 15 Agustus 2026
-client.on('guildMemberAdd', (member) => {
-  // Set time interval in milliseconds
-  const delayMs = 30 * 24 * 60 * 60 * 1000; 
-  const roleId = config.pendudukLokalId;
-  const roleLawas = config.pendatangId;
-
-  setTimeout(async () => {
-    try {
-      await member.roles.add(roleId);
-      await member.roles.remove(roleLawas);
-      console.log(`Assigned role to ${member.user.tag}`);
-    } catch (error) {
-      console.error('Failed to assign role:', error);
-    }
-  }, delayMs);
-});
-
 client.login(config.token);
