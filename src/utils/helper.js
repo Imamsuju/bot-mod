@@ -319,10 +319,53 @@ async function executeCommand(command, message, args) {
     }
 }
 
+async function setRolePenduduk(client, config) {
+    // console.log(client);
+    console.log(config);
+    console.log(config.guildId);
+    client.once('clientReady', async () => {
+        const guild = await client.guilds.fetch(config.guildId);
+        console.log(guild);
+        console.log("Fetching guild members...");
+        await guild.members.fetch();
+        const role = guild.roles.cache.get(config.pendudukLokalId);
+
+        if (!role) {
+            console.log("Role not found.");
+            return;
+        }
+
+        // 4. Map the members holding that role to an array of usernames/IDs
+        // const membersWithRole = role.members.map(member => ({
+        //     id: member.user.id,
+        //     tag: member.user.tag,
+        //     displayName: member.displayName
+        // }));
+        const memberRole = role.members;
+        // console.log(memberRole);
+        memberRole.forEach(member => {
+            if(member.roles.cache.has(config.pendatangId)){
+                member.roles.remove(config.pendatangId)
+                .then(() => console.log('Hapus Role Pendatang.'))
+                .catch(console.error);
+            } else {
+                console.log(`Biarin aja, udah dihapus kok`);
+            }
+        });
+        // role.memnbers.each(member => {
+        //     console.log(member);
+        // });
+
+        // console.log(`Found ${membersWithRole.length} members with the role "${role.name}":`);
+        // console.log(membersWithRole);
+    });
+}
+
 module.exports = {
     getUser,
     checkCommand,
     moderatorOnly,
     isMembershipMember,
-    executeCommand
+    executeCommand,
+    setRolePenduduk
 }
