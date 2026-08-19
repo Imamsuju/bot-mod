@@ -35,6 +35,11 @@
 		"moderator" : false
 	},
 	{
+		"name" : "tirukan",
+		"membership" : false,
+		"moderator" : true
+	},
+	{
 		"name": "id",
 		"membership" : false,
         "moderator": false

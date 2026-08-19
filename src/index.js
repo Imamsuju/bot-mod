@@ -27,8 +27,6 @@ utils.cron.happyBirthdayTask(client, config);
 // ini buat yang gabung sebelum tanggal 15 Agustus 2026
 utils.cron.setPendudukLocal(client, config);
 
-utils.helper.setRolePenduduk(client, config);
-
 // Bot online
 client.once('clientReady', () => {
     console.log(`Ready! Logged in as ${client.user.tag}`);

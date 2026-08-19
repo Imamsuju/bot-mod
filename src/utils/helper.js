@@ -311,6 +311,15 @@ async function executeCommand(command, message, args) {
                 return sendAttachment(message, './src/img/astagfirullah.webp', '');
             }
             break;
+        
+        case 'tirukan':
+            console.log(`Command "tirukan" recognized.`);
+            console.log(`Moderator Only: ${cmd.moderator}, Membership Only: ${cmd.membership}`);
+            if(verifyCommandPermissions(cmd, message)){
+                let word = args.join(' ');
+                return message.reply(`${word}`);
+            }
+            break;
 
         default:
             console.log(`Command "${command}" not recognized.`);
